@@ -10,66 +10,136 @@ class CAbase {
         ~CAbase();
         int Nx;
         int Ny;
-        char **current_status = new char*[Nx+2];
+        char *current_status = new char[Nx*Ny];
         char *following_status = new char[Nx*Ny];
         void get_raster();
         void set_raster(int, int);
+        void get_status(int, int);
+        void get_status_following(int, int);
         void set_cell(int, int);
+        void evolve(int, int);
+        void call_evolve();
         void print();
 };
 
 CAbase::CAbase() {
-    std::cout << "Universe is being created" << std::endl;
+    std::cout << "Universe is being created\n\n" << std::endl;
 }
 
 CAbase::~CAbase() {
     std::cout << "Universe is being destroyed" << std::endl;
-    // delete universe???
+    delete[] current_status;
+    delete[] following_status;
 }
 
 void CAbase::get_raster() {
-    std::cout << "Width of universe: "<< Nx << std::endl;
-    std::cout << "Length of universe: "<< Ny << std::endl;
+    std::cout << "Width of universe: "<< Nx-2 << std::endl;
+    std::cout << "Length of universe: "<< Ny-2 << std::endl;
 }
 
 void CAbase::set_raster(int x, int y) {
-    Nx = x;
-    Ny = y;
-    for (int i = 0; i < Nx+3; ++i ) {
-      current_status[i] = new char[Ny+2];
+    Nx = x+2;
+    Ny = y+2;
+
+
+    for (int i = 0; i<Nx; ++i) {
+        for(int j = 0; j<Ny; ++j) {
+            current_status[Nx*i+j] = ' ';
+            following_status[Nx*i+j] = ' ';
+        }
     }
-    for (int i = 0; i < Nx+3; ++i ) {
-        current_status[i][0] = '|';
-        //current_status[0][i] = '-';
-        current_status[i][Nx+1] = '|';
-        //current_status[Nx+1][i] = '-';
-      }
-    for (int j = 0; j < Ny+3; ++j ) {
-        //current_status[i][0] = '|';
-        current_status[0][j] = '-';
-        //current_status[5][Nx+1] = '|';
-        current_status[Ny+1][j] = '-';
+
+
+    for (int i = 0; i<Nx; ++i) {
+        current_status[Nx*i] = '+';
+        current_status[Nx*i+Ny-1] = '+';
+        current_status[i] = '+';
+        current_status[Nx*Ny-i] = '+';
+        following_status[Nx*i] = '+';
+        following_status[Nx*i+Ny-1] = '+';
+        following_status[i] = '+';
+        following_status[Nx*Ny-i] = '+';
+    }
+}
+
+void CAbase::set_cell(int x, int y) {
+    current_status[Nx*x+y] = '*';
+}
+
+void CAbase::get_status(int x, int y) {
+    if (current_status[Nx*x+y] == '*') {
+        std::cout << "Cell is alive" << std::endl;
+    }
+    else {
+        std::cout << "Cell is dead" << std::endl;
     }
 
 }
 
+void CAbase::get_status_following(int x, int y) {
+    evolve(x,y);
+    if (following_status[Nx*x+y] == '*') {
+        std::cout << "Cell will be alive" << std::endl;
+    }
+    else {
+        std::cout << "Cell will be dead" << std::endl;
+    }
 
-void CAbase::set_cell(int x, int y) {
-    current_status[x][y] = '*';
 }
 
 void CAbase::print() {
-    for (int i = 0; i<Nx+2; i++) {
-        for(int j = 0; j<Ny+2; j++) {
-            std::cout << current_status[i][j];
+    std::cout << "\n\n";
+    for (int i = 0; i<Nx; ++i) {
+        for(int j = 0; j<Ny; ++j) {
+            std::cout << current_status[Nx*i+j];
         }
-    std::cout << std::endl;
+        std::cout << std::endl;
     }
+    std::cout << "\n\n";
 }
 
+void CAbase::evolve(int x, int y) {
+    int counter = 0;
 
-void evolve(char cell[int x][int y]) {
-    std::vector<char> neighbours [] = {cell[x-1][y-1],cell[x-1][y],cell[x-1][y+1],cell[x][y-1],cell[x][y+1],cell[x+1][y-1],cell[x+1][y],cell[x+1][y+1]};
+    for (int i=-1;i<=1;++i) {
+        for (int j=-1;j<=1;++j) {
+            if (current_status[Nx*(x+i)+(y+j)] == '*')
+                counter += 1;
+        }
+    }
+    if (current_status[Nx*x+y] == '*'){
+        counter -= 1;        // cell itself
+    }
+    if (counter < 2) {
+        following_status[Nx*x+y] = ' ';
+    }
+    else if (counter == 3) {
+        following_status[Nx*x+y] = '*';
+    }
+    else if (counter == 3 || counter == 2) {
+        following_status[Nx*x+y] = current_status[Nx*x+y];
+    }
+    else if (counter > 3) {
+        following_status[Nx*x+y] = ' ';
+    }
+    if (counter == 3) {
+        // std::cout << "Zelle" << x <<"," << y << "hat " << counter << "Nachbarn";
+    }
+
+
+}
+
+void CAbase::call_evolve() {
+    for (int i = 1; i<Nx-1; ++i) {
+        for(int j = 1; j<Ny-1; ++j) {
+            evolve(i,j);
+        }
+}
+    for (int i = 0; i<Nx; ++i) {
+        for(int j = 0; j<Ny; ++j) {
+            current_status[Nx*i+j] = following_status[Nx*i+j];
+        }
+    }
 }
 
 #endif // CABASE_H_INCLUDED
