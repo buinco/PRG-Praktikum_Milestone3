@@ -23,6 +23,7 @@ class CAbase {
 };
 
 CAbase::CAbase() {
+    // hier Nx und Ny als Parameter
     std::cout << "Universe is being created\n\n" << std::endl;
 }
 
@@ -125,6 +126,8 @@ void CAbase::evolve(int x, int y) {
     if (counter == 3) {
         // std::cout << "Zelle" << x <<"," << y << "hat " << counter << "Nachbarn";
     }
+
+    // kugelförmige fläche -> mod?
 
 
 }

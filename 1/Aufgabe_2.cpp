@@ -2,13 +2,27 @@
 #include "CAbase.h"
 
 int main () {
+    // Constructor mit Parametern
+    // Kugelform?
+    // Header nur Klassen
+    // CAbase.cpp mit Klassenfunktionalität
+    // main
+
     CAbase ca;
     ca.set_raster(30,30);
+    int ran_row, ran_col;
+    for (int i=0;i<100;++i) {
+        ran_row = rand() % 30 + 1;
+        ran_col = rand() % 30 + 1;
+        ca.current_status[30*ran_row + ran_col] = '*';
+    }
+
     ca.set_cell(15,15);
     ca.set_cell(15,16);
     ca.set_cell(17,17);
     ca.set_cell(1,20);
     ca.set_cell(4,16);
+
     ca.print();
 
     int entry;
